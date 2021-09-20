@@ -1,0 +1,158 @@
+---
+title: "Práctico Computacional No1 - E1EMA1"
+author: "Grupo 7"
+date: "19/9/2021"
+output: html_document
+---
+
+### Ejercicio 1
+
+#### Determinar el mayor factor primo del número 7134719293497. Para ello, se pide construir y usar dos funciones: una llamada “primo”, que tenga como input algún número, y como output un booleano (TRUE o FALSE) que señale si el número input es primo o no; y otra función llamada “maxprimo”, que reciba como input el número de interés (en este caso, 7134719293497), y que arroje como output el máximo factor primo. Claramente, esta segunda función va a operar utilizando también a la primera función.
+
+La función *primo* tiene como valor por defecto VERDADERO, ya que si el input es 2 arrojará automáticamente este valor. En caso que sea 0 o 1, el output será FALSO.
+El procedimiento ocurre una vez que el input es un número entero mayor que 2, recorriendo un ciclo *while* que se detendrá una vez que el input sea divisible entre un número comprendido entre 2 y el mismo input, esto acabará y retornará FALSO en el momento en que sea divisible al menos por uno de estos números.
+  
+```{r}
+primo <- function(x) {
+  value <- TRUE
+  
+  if(x < 2) value <- FALSE
+  if(x > 2) {
+    end <- FALSE
+    
+    divider <- 2
+    half <- floor(x / 2)
+    
+    while(!end) {
+      if(divider < half) {
+        r <- x %% divider
+        
+        if(r == 0) {
+          end <- TRUE
+          value <- FALSE
+        }
+        else divider <- divider + 1
+      }
+      else end <- TRUE
+    }
+  }
+  
+  return(value)
+}
+```
+
+Ahora, procedemos a crear la funcion *maxprimo*, la cual hace el mismo proceso que la anterior pero solamente revisa los divisores que sean primos. Encuentra en mínimo divisor y automáticamente toma su complemento multiplicatorio para comprobar si este es primo. En caso lo sea, arrojará este valor como resultado, sino seguirá hasta encontrarlo. Cabe resaltar que esta función tiene un tope hasta la mitad del input, ya que si no encuentra un valor menor a este automáticamente arrojará como máximo divisor primo al input o uno cercano a su media, esto hace que el proceso se optimice y no tarde mucho tiempo para así poder hacer cálculos con número grandes.
+
+```{r}
+maxprimo <- function(x) {
+  if(x < 0) x <- x * (-1)
+  if(x <= 1) return('This number has no prime factors.')
+  
+  end <- FALSE
+  
+  min_divider <- 2
+  max_divider <- x
+  
+  half <- floor(x / 2)
+  
+  while(!end) {
+    if(min_divider > half) {
+      end <- TRUE
+      break
+    }
+    
+    r <- max_divider %% min_divider
+    
+    if(r > 0) min_divider <- min_divider + 1
+    else {
+      max_divider <- max_divider / min_divider
+      is_prime <- primo(max_divider)
+      
+      if(is_prime) end <- TRUE
+    }
+  }
+  
+  paste('The largest prime factor is:', max_divider, sep = ' ')
+}
+```
+
+Por último, hallamos el mayor divisor primo:
+
+```{r}
+maxprimo(7134719293497)
+```
+
+### Ejercicio 2
+
+#### Genere una secuencia de 1 millón de números aleatorios, usando una función de distribución Poisson, cuya media sea de 2 y varianza sea 1.
+
+Fijamos una semilla.
+
+```{r}
+set.seed(1)
+```
+
+Creamos la función de distribución de Poisson:
+
+```{r}
+data <- rpois(1000000, lambda = 4)
+```
+
+#### Escoja una muestra aleatoria de 20 unidades, calcule la media muestral y multiplique por la raiz cuadrada de 20. Repita este proceso unas 1000 veces y grafique el histograma de frecuencias.
+
+Creamos una función que nos será muy útil para diversos cáculos:
+
+```{r}
+generate_hist <- function(sample_size, repetitions = 1000) {
+  counter <- 0
+  results <- c()
+  tests <- c()
+  
+  while(counter < repetitions) {
+    counter <- counter + 1
+    aleatory <- sample(data, sample_size, replace = TRUE)
+    result <- mean(aleatory, na.rm = FALSE) * sqrt(20)
+    results <- c(results, result)
+  }
+  
+  hist(results, freq = FALSE)
+  
+  return(density(results))
+}
+```
+
+Esta función require dos inputs, el tamaño de la muestra y el número de repeticiones del proceso. Crea un ciclo que se repetirá el número de repeticiones e irá añadiendo un valor  al vector vacío creado al inicio. Por último generará el histograma y retornará la función de densidad que usaremos más adelante para hacer comparaciones y rescatar resultados.
+
+Usamos la función anterior para generar el histograma de frecuencias pedido anteriormente:
+
+```{r}
+generate_hist(20)
+```
+
+Resultados
+
+1. Observamos que el valor mínimo es de 10,05 para X.
+2. El primer cuartil es 14.25, es decir que el 25% de los datos es menor igual a este número.
+3. Podemos decir que sus datos son simétricos puesto que la mediana y la media son iguales.
+4. El tercer cuartil es 22.65 es decir que el 75% de sus datos es menor que o igual a 22,65.
+5. El valor máximo es de 26,85.
+
+##### Repita el ejercicio anterior pero esta vez con un tamaño de muestra igual a 100, 1000, 10000 y 100000. Compare los histogramas de frecuencias para cada una de los diferentes tamaños muestrales.
+
+Usamos la función auxiliar anterior y generamos lo siguiente:
+
+```{r}
+for_100 = generate_hist(100)
+plot(for_100)
+
+for_1000 = generate_hist(1000)
+plot(for_1000)
+
+for_10000 = generate_hist(10000)
+plot(for_10000)
+
+for_100000 = generate_hist(100000)
+plot(for_100000)
+```
+
+En estos gráficos, las muestras de 100, 1000, 10000 y 100000 observamos que son simétricos porque se obtienen las mismas medias y medianas en cada muestra, además podemos apreciar que se dan variaciones en la gráficas, por lo que llegamos a concluir que mientras más grande es la muestra, los resultados empezaran a disminuir dándose a notar en los gráficos.

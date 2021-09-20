@@ -63,5 +63,3 @@ maxprimo <- function(x) {
 }
 
 maxprimo(7134719293497)
-
-# Value calculated in approximately 8 seconds

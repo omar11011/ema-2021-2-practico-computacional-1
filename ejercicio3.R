@@ -1,3 +1,5 @@
+set.seed(100)
+
 attach(serie)
 
 library(xts)

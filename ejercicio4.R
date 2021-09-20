@@ -1,3 +1,5 @@
+set.seed(2)
+
 library(xts)
 library(tidyverse)
 library(lubridate)
